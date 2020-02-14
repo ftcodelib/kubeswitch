@@ -1,3 +1,6 @@
+# Kubeswitch
+
+## Install the script
 1. Download the script
 
 2. Make it executable.
@@ -9,7 +12,7 @@
 4. Add below line into your .bashrc or .zshrc (optional).
 `export PATH=$HOME/tools/:$PATH`
 
-##Using kubeswitch
+## Using kubeswitch
 
 1. To add new kubeconfig or edit existing kubeconfig.
 `kubeswitch {add|edit} <your_preferred_config_name>`
