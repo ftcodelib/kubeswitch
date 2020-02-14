@@ -51,6 +51,6 @@ help)
     ;;
 *)
     printf "Invalid option: %s\n" "${RED}$@${RESET}"
-    ${DIR}/kubeswitch.sh help
+    ${DIR}/kubeswitch help
     ;;
 esac
