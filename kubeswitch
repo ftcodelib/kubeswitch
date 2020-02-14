@@ -1,0 +1,56 @@
+# Author: M.Farhan.Taib
+# Version: 5
+
+
+#!/bin/bash
+
+BLUE=$(tput setaf 4)
+RED=$(tput setaf 1)
+RESET=$(tput sgr0)
+CYAN=$(tput setaf 6)
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+ks_input=$1
+ks_site=$2
+case $ks_input in
+set)
+    [ -h ~/.kube/config ] && unlink ~/.kube/config
+    ln -s ~/.kube/config-${ks_site} ~/.kube/config
+    kubectl config get-contexts
+    ;;
+context)
+    kubectl config get-contexts
+    ;;
+status)
+    if [ -h ~/.kube/config ]; then
+        printf "Current profile: %s\n" "${BLUE} $(basename $(ls -ld ~/.kube/config | awk -F' -> ' '{print $2}')) ${RESET}"
+    else
+        echo "No profile configured"
+    fi
+    ;;
+clear)
+    if [ -h ~/.kube/config ]; then
+        unlink ~/.kube/config
+    fi
+    ;;
+list)
+    printf "Available KUBECONFIG:\n"
+    basename $(ls -1 ~/.kube/config-*) | sed -e 's/config-//g'
+    ;;
+add|edit)
+    if [ -z "$2" ]; then
+        printf "${RED}ERROR${RESET}: Provide the Name! \n"
+	exit 1
+    fi
+    vi ~/.kube/config-$2
+    ls -ld ~/.kube/config-$2
+    ;;
+help)
+    printf "%s\n" "${CYAN}Usage:${RESET} kubeswitch {clear|context|status|clear|list} {add|edit|set KUBECONFIG}"
+    ;;
+*)
+    printf "Invalid option: %s\n" "${RED}$@${RESET}"
+    ${DIR}/kubeswitch.sh help
+    ;;
+esac
