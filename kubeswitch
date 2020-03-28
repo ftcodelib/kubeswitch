@@ -1,5 +1,5 @@
 # Author: M.Farhan.Taib
-# Version: 5
+# Version: 6
 
 
 #!/bin/bash
@@ -10,6 +10,10 @@ RESET=$(tput sgr0)
 CYAN=$(tput setaf 6)
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [ ! -d ~/.kube/backup ]; then
+    mkdir -p ~/.kube/backup
+fi
 
 ks_input=$1
 ks_site=$2
@@ -41,16 +45,26 @@ list)
 add|edit)
     if [ -z "$2" ]; then
         printf "${RED}ERROR${RESET}: Provide the Name! \n"
-	exit 1
+            exit 0
     fi
     vi ~/.kube/config-$2
     ls -ld ~/.kube/config-$2
     ;;
+rm|delete)
+    if [ -z "$2" ] || [ ! -f ~/.kube/config-$2 ]; then
+        printf "${RED}ERROR${RESET}: Kubeconfig not found! \n"
+            exit 0
+    fi
+    cp -rp ~/.kube/config-$2 ~/.kube/backup/config-$2.$(date +%Y%m%d%s)
+    echo "$(rm -v ~/.kube/config-$2) ${RED}Removed!${RESET}"
+    ;;
 help)
-    printf "%s\n" "${CYAN}Usage:${RESET} kubeswitch {clear|context|status|clear|list} {add|edit|set KUBECONFIG}"
+    printf "%s\n" "${CYAN}Usage:${RESET} kubeswitch {status|clear|list|context} {add|edit|delete|rm|set KUBECONFIG}"
+    exit 0
     ;;
 *)
     printf "Invalid option: %s\n" "${RED}$@${RESET}"
-    ${DIR}/kubeswitch help
+    ${DIR}/$(basename "$0") help
+    exit 1
     ;;
 esac
