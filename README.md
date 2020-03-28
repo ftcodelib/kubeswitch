@@ -30,4 +30,4 @@
 `kubeswitch list`
 
 6. To remove config file
-`kubeswitch {rm|delete} <target_config_name>
+`kubeswitch {rm|delete} <target_config_name>`
