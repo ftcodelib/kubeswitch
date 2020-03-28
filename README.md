@@ -28,3 +28,6 @@
 
 5. To list all available config 
 `kubeswitch list`
+
+6. To remove config file
+`kubeswitch {rm|delete} <target_config_name>
