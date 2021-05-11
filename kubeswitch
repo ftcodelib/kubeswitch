@@ -1,9 +1,9 @@
 # Author: M.Farhan.Taib
-# Version: 6
-
+# Version: 7
 
 #!/bin/bash
 
+BKPDATE=$(date +%Y%m%d%M%S)
 BLUE=$(tput setaf 4)
 RED=$(tput setaf 1)
 RESET=$(tput sgr0)
@@ -45,22 +45,44 @@ list)
 add|edit)
     if [ -z "$2" ]; then
         printf "${RED}ERROR${RESET}: Provide the Name! \n"
-            exit 0
+	    exit 1
     fi
+    cp -rp ~/.kube/config-$2 ~/.kube/backup/config-$2.$BKPDATE
     vi ~/.kube/config-$2
-    ls -ld ~/.kube/config-$2
+    printf "${BLUE}CREATED/MODIFIED${RESET}: %s \n" "$(stat -f "%m%t%Sm %N" ~/.kube/config-$2 | head -3 | cut -f2-)"
     ;;
 rm|delete)
     if [ -z "$2" ] || [ ! -f ~/.kube/config-$2 ]; then
         printf "${RED}ERROR${RESET}: Kubeconfig not found! \n"
-            exit 0
+	    exit 1
     fi
-    cp -rp ~/.kube/config-$2 ~/.kube/backup/config-$2.$(date +%Y%m%d%s)
+    cp -rp ~/.kube/config-$2 ~/.kube/backup/config-$2.$BKPDATE
     echo "$(rm -v ~/.kube/config-$2) ${RED}Removed!${RESET}"
     ;;
+show)
+    if [ -z "$2" ] && [ -h ~/.kube/config ]; then
+        printf "${CYAN}INFO${RESET}: No specified kube config given. Showing Current Kubeconfig:\n\n"
+        printf "${BLUE}---------------------------------------${RESET}\n"
+        cat ~/.kube/config
+        printf "${BLUE}---------------------------------------${RESET}\n"
+	    exit 0
+    elif [ ! -f ~/.kube/config-$2 ]; then
+        printf "${RED}ERROR${RESET}: Kubeconfig not found! \n"
+        exit 1
+    else
+        printf "${BLUE}---------------------------------------${RESET}\n"
+        cat ~/.kube/config-$2
+        printf "${BLUE}---------------------------------------${RESET}\n"
+        exit 0
+    fi
+
+    ;;
+backup)
+    tar -czf ~/.kube/backup/kube.$BKPDATE.tgz --options='compression-level=9' ~/.kube/config-* > /dev/null 2>&1
+    file ~/.kube/backup/kube.$BKPDATE.tgz
+    ;;
 help)
-    printf "%s\n" "${CYAN}Usage:${RESET} kubeswitch {status|clear|list|context} {add|edit|delete|rm|set KUBECONFIG}"
-    exit 0
+    printf "%s\n" "${CYAN}Usage:${RESET} kubeswitch {status|clear|list|context|backup} {add|edit|delete|rm|show|set KUBECONFIG}"
     ;;
 *)
     printf "Invalid option: %s\n" "${RED}$@${RESET}"
@@ -68,3 +90,5 @@ help)
     exit 1
     ;;
 esac
+
+exit 0
